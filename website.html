@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Romantic Games 💜</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #a2d5f2 0%, #b3d9ff 100%);
+      color: #22223b;
+      font-family: 'Comic Sans MS', 'Comic Sans', Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0 10px 0;
+      width: 100%;
+      max-width: 400px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px 0;
+      background: #a259f2;
+      color: #fff;
+      border: none;
+      border-radius: 10px 10px 0 0;
+      font-size: 1.1em;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      outline: none;
+    }
+    .tab-btn.active {
+      background: #fff;
+      color: #a259f2;
+      font-weight: bold;
+      border-bottom: 2px solid #a259f2;
+    }
+    .tab-content {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.95);
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 2px 12px rgba(90,46,138,0.08);
+      padding: 20px 10px 30px 10px;
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    /* --- Romantic Message Generator styles --- */
+    #romantic-message #message {
+      font-size: 1.5em;
+      padding: 16px;
+      max-width: 90%;
+      margin: 0 auto 20px auto;
+      color: #5a2e8a;
+      background: #e0f0ff;
+      border-radius: 12px;
+      min-height: 60px;
+      letter-spacing: 0.01em;
+    }
+    #romantic-message .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    #romantic-message button {
+      background-color: #a259f2;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 12px 22px;
+      font-size: 1em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.2s;
+      font-family: inherit;
+      font-weight: bold;
+    }
+    #romantic-message button:focus,
+    #romantic-message button:hover {
+      background-color: #c299fc;
+      color: #22223b;
+    }
+    /* --- Find the Heart styles --- */
+    #find-heart h1 {
+      color: #5a2e8a;
+      font-size: 1.4em;
+      margin-bottom: 8px;
+    }
+    #find-heart p {
+      color: #22223b;
+      font-size: 1em;
+      margin-bottom: 10px;
+    }
+    #find-heart .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      justify-content: center;
+      margin: 18px auto 0 auto;
+      max-width: 340px;
+    }
+    #find-heart .box {
+      width: 70px;
+      height: 70px;
+      background-color: #e0f0ff;
+      border: 2px solid #5a2e8a;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 2em;
+      line-height: 70px;
+      transition: 0.2s;
+      color: #5a2e8a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      user-select: none;
+    }
+    #find-heart .box:hover, #find-heart .box:focus {
+      background-color: #99ccff;
+      outline: 2px solid #a259f2;
+    }
+    #find-heart #message {
+      margin-top: 22px;
+      font-size: 1.1em;
+      color: #5a2e8a;
+      min-height: 30px;
+    }
+    #find-heart #attempts {
+      margin-top: 8px;
+      font-size: 1em;
+      color: #5a2e8a;
+      font-weight: bold;
+    }
+    #find-heart #gameOverVideoContainer {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      cursor: default;
+    }
+    #find-heart #gameOverVideo {
+      max-width: 96vw;
+      max-height: 80vh;
+      border-radius: 12px;
+      box-shadow: 0 0 30px #5a2e8a;
+      background: black;
+    }
+    @media (max-width: 600px) {
+      .tab-content {
+        padding: 10px 2vw 20px 2vw;
+      }
+      #find-heart .grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 7px;
+        max-width: 98vw;
+      }
+      #find-heart .box {
+        width: 16vw;
+        height: 16vw;
+        min-width: 48px;
+        min-height: 48px;
+        font-size: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="tab-buttons">
+    <button class="tab-btn active" onclick="showTab('romantic-message')">💌 Romantic Message</button>
+    <button class="tab-btn" onclick="showTab('find-heart')">💜 Find the Heart</button>
+  </div>
+
+  <!-- Romantic Message Generator -->
+  <div class="tab-content active" id="romantic-message">
+    <div id="message">Click "Generate" to receive a sweet message 💜</div>
+    <div class="buttons">
+      <button onclick="generateMessage()">Generate</button>
+      <button onclick="translateMessage()">Translate</button>
+    </div>
+  </div>
+
+  <!-- Find the Heart Game -->
+  <div class="tab-content" id="find-heart">
+    <h1>🎁 Find the Heart 💜</h1>
+    <p>Only 9 attempts to find my heart hidden in one of these boxes. Good luck!</p>
+    <div class="grid" id="gameGrid"></div>
+    <div id="attempts">Attempts left: 9</div>
+    <div id="message"></div>
+    <audio id="wrongSound" preload="auto" src="wrong.mp3"></audio>
+    <audio id="winSound" preload="auto" src="win.mp3"></audio>
+    <div id="gameOverVideoContainer">
+      <video id="gameOverVideo" src="gameover.mp4" preload="auto"></video>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching logic
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      if(tabId === 'romantic-message') {
+        document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+      } else {
+        document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+      }
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Romantic Message Generator logic
+    const messages = [
+      { en: "I love your smile. 💜", fr: "J'aime ton sourire. 💜" },
+      { en: "You are my favorite person. 💜", fr: "Tu es ma personne préférée. 💜" },
+      { en: "Every day with you is special. 💜", fr: "Chaque jour avec toi est spécial. 💜" },
+      { en: "You make my heart happy. 💜", fr: "Tu rends mon cœur heureux. 💜" },
+      { en: "I can't stop thinking about you. 💜", fr: "Je ne peux pas arrêter de penser à toi. 💜" },
+      { en: "You're all I need. 💜", fr: "Tu es tout ce dont j'ai besoin. 💜" },
+      { en: "You complete me. 💜", fr: "Tu me complètes. 💜" },
+      { en: "My heart belongs to you. 💜", fr: "Mon cœur t'appartient. 💜" },
+      { en: "You are my everything. 💜", fr: "Tu es tout pour moi. 💜" },
+      { en: "Your voice is my favorite sound. 💜", fr: "Ta voix est mon son préféré. 💜" },
+      { en: "You make me feel safe. 💜", fr: "Tu me fais sentir en sécurité. 💜" },
+      { en: "You are the reason I smile. 💜", fr: "Tu es la raison pour laquelle je souris. 💜" },
+      { en: "I love the way you look at me. 💜", fr: "J'aime la façon dont tu me regardes. 💜" },
+      { en: "You're my happy place. 💜", fr: "Tu es mon endroit heureux. 💜" },
+      { en: "You are my light in the dark. 💜", fr: "Tu es ma lumière dans le noir. 💜" },
+      { en: "I feel lucky to have you. 💜", fr: "Je me sens chanceux de t'avoir. 💜" },
+      { en: "You're my dream come true. 💜", fr: "Tu es mon rêve devenu réalité. 💜" },
+      { en: "You're the best part of my day. 💜", fr: "Tu es la meilleure partie de ma journée. 💜" },
+      { en: "I want to be with you forever. 💜", fr: "Je veux être avec toi pour toujours. 💜" },
+      { en: "You make my life better. 💜", fr: "Tu rends ma vie meilleure. 💜" },
+      { en: "I adore you. 💜", fr: "Je t'adore. 💜" },
+      { en: "You're the love of my life. 💜", fr: "Tu es l'amour de ma vie. 💜" },
+      { en: "You're so special to me. 💜", fr: "Tu es tellement spécial pour moi. 💜" },
+      { en: "I love being near you. 💜", fr: "J'aime être près de toi. 💜" },
+      { en: "You make me laugh like no one else. 💜", fr: "Tu me fais rire comme personne d'autre. 💜" },
+      { en: "You are my favorite hello and hardest goodbye. 💜", fr: "Tu es mon bonjour préféré et mon au revoir le plus difficile. 💜" },
+      { en: "You bring light into my life. 💜", fr: "Tu apportes de la lumière dans ma vie. 💜" },
+      { en: "I miss you even when you're near. 💜", fr: "Tu me manques même quand tu es proche. 💜" },
+      { en: "You're everything I ever wanted. 💜", fr: "Tu es tout ce que j'ai toujours voulu. 💜" },
+      { en: "You make me believe in love. 💜", fr: "Tu me fais croire en l'amour. 💜" },
+      { en: "Being with you feels like home. 💜", fr: "Être avec toi, c'est comme être chez moi. 💜" },
+      { en: "I want to make you happy every day. 💜", fr: "Je veux te rendre heureux chaque jour. 💜" },
+      { en: "You're my one and only. 💜", fr: "Tu es mon unique. 💜" },
+      { en: "I'm proud to love you. 💜", fr: "Je suis fier de t'aimer. 💜" },
+      { en: "I love your laugh. 💜", fr: "J'aime ton rire. 💜" },
+      { en: "You're perfect to me. 💜", fr: "Tu es parfait pour moi. 💜" },
+      { en: "I'm yours, always. 💜", fr: "Je suis à toi, toujours. 💜" },
+      { en: "You're the reason my heart beats. 💜", fr: "Tu es la raison pour laquelle mon cœur bat. 💜" },
+      { en: "You and me, always. 💜", fr: "Toi et moi, toujours. 💜" },
+      { en: "You're my sweet escape. 💜", fr: "Tu es mon doux refuge. 💜" },
+      { en: "I love the way you love me. 💜", fr: "J'aime la façon dont tu m'aimes. 💜" },
+      { en: "You're the one I want to wake up next to. 💜", fr: "Tu es celui que je veux voir au réveil. 💜" },
+      { en: "You're my forever. 💜", fr: "Tu es mon pour toujours. 💜" },
+      { en: "Just thinking of you makes me smile. 💜", fr: "Penser à toi me fait sourire. 💜" },
+      { en: "You are precious to me. 💜", fr: "Tu es précieux pour moi. 💜" },
+      { en: "My heart is full of you. 💜", fr: "Mon cœur est rempli de toi. 💜" },
+      { en: "I love spending time with you. 💜", fr: "J'aime passer du temps avec toi. 💜" },
+      { en: "You're everything good in my life. 💜", fr: "Tu es tout ce qu'il y a de bon dans ma vie. 💜" },
+      { en: "You are my sunshine on a cloudy day. 💜", fr: "Tu es mon rayon de soleil par temps nuageux. 💜" },
+      { en: "With you, every moment is magical. 💜", fr: "Avec toi, chaque moment est magique. 💜" },
+      { en: "I fall in love with you more every day. 💜", fr: "Je tombe amoureux de toi un peu plus chaque jour. 💜" },
+      { en: "You make my world brighter. 💜", fr: "Tu rends mon monde plus lumineux. 💜" },
+      { en: "I cherish every memory with you. 💜", fr: "Je chéris chaque souvenir avec toi. 💜" },
+      { en: "You are my best friend and my love. 💜", fr: "Tu es mon meilleur ami et mon amour. 💜" },
+      { en: "My favorite place is next to you. 💜", fr: "Mon endroit préféré est à côté de toi. 💜" },
+      { en: "You are the sweetest part of my life. 💜", fr: "Tu es la partie la plus douce de ma vie. 💜" },
+      { en: "I love you more than words can say. 💜", fr: "Je t'aime plus que les mots ne peuvent le dire. 💜" },
+      { en: "You are my heart. 💜", fr: "Tu es mon cœur. 💜" },
+    ];
+    let currentIndex = null;
+    function generateMessage() {
+      const index = Math.floor(Math.random() * messages.length);
+      currentIndex = index;
+      document.querySelector("#romantic-message #message").textContent = messages[index].en;
+    }
+    function translateMessage() {
+      if (currentIndex !== null) {
+        document.querySelector("#romantic-message #message").textContent = messages[currentIndex].fr;
+      }
+    }
+
+    // Find the Heart Game logic
+    const totalBoxes = 16;
+    const maxAttempts = 9;
+    let attemptsLeft;
+    let heartIndex;
+    const grid = document.getElementById("gameGrid");
+    const message = document.querySelector("#find-heart #message");
+    const attemptsDisplay = document.getElementById("attempts");
+    const wrongSound = document.getElementById("wrongSound");
+    const winSound = document.getElementById("winSound");
+    const gameOverVideoContainer = document.getElementById("gameOverVideoContainer");
+    const gameOverVideo = document.getElementById("gameOverVideo");
+    const wrongImgURL = "https://pbs.twimg.com/media/EQRs5SkXkAAJ1py.jpg";
+    function initGame() {
+      attemptsLeft = maxAttempts;
+      attemptsDisplay.textContent = `Attempts left: ${attemptsLeft}`;
+      message.textContent = "";
+      gameOverVideoContainer.style.display = "none";
+      gameOverVideo.pause();
+      gameOverVideo.currentTime = 0;
+      grid.innerHTML = "";
+      heartIndex = Math.floor(Math.random() * totalBoxes);
+      for (let i = 0; i < totalBoxes; i++) {
+        const box = document.createElement("div");
+        box.classList.add("box");
+        box.dataset.index = i;
+        box.style.backgroundImage = "";
+        box.textContent = "";
+        box.style.pointerEvents = "auto";
+        box.classList.remove("clicked");
+        box.setAttribute("tabindex", "0");
+        box.setAttribute("aria-label", "Box");
+        box.addEventListener("click", () => handleBoxClick(i, box));
+        box.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleBoxClick(i, box);
+          }
+        });
+        grid.appendChild(box);
+      }
+    }
+    function handleBoxClick(i, box) {
+      if (attemptsLeft <= 0) return;
+      if (i === heartIndex) {
+        box.innerHTML = "💜";
+        message.innerHTML = "You found my heart, and it's all yours, Korey 💌";
+        attemptsDisplay.textContent = "";
+        disableAllBoxes();
+        playWinSound();
+      } else {
+        if (!box.classList.contains("clicked")) {
+          attemptsLeft--;
+          attemptsDisplay.textContent = `Attempts left: ${attemptsLeft}`;
+          box.style.backgroundImage = `url(${wrongImgURL})`;
+          box.style.backgroundSize = "cover";
+          box.style.backgroundPosition = "center";
+          box.textContent = "";
+          box.classList.add("clicked");
+          box.style.pointerEvents = "none";
+          if (attemptsLeft > 0) {
+            wrongSound.currentTime = 0;
+            wrongSound.play();
+          } else {
+            message.textContent = "Game over! You ran out of attempts 😢";
+            disableAllBoxes();
+            showGameOverVideo();
+          }
+        }
+      }
+    }
+    function disableAllBoxes() {
+      const boxes = document.querySelectorAll("#find-heart .box");
+      boxes.forEach(box => (box.style.pointerEvents = "none"));
+    }
+    function playWinSound() {
+      if (winSound.src) {
+        winSound.currentTime = 0;
+        winSound.play();
+      }
+    }
+    function showGameOverVideo() {
+      gameOverVideoContainer.style.display = "flex";
+      gameOverVideo.play();
+    }
+    gameOverVideo.addEventListener("ended", () => {
+      gameOverVideoContainer.style.display = "none";
+      initGame();
+    });
+    // Only initialize the game when the tab is shown
+    let gameInitialized = false;
+    document.querySelector('.tab-btn:nth-child(2)').addEventListener('click', () => {
+      if (!gameInitialized) {
+        initGame();
+        gameInitialized = true;
+      }
+    });
+    // Optionally, initialize on load if you want
+    // initGame();
+  </script>
+</body>
+</html>
