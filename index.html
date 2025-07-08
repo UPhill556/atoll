@@ -183,16 +183,82 @@
       box-shadow: 0 0 30px #7c6ee6;
       background: #22223b;
     }
+    /* --- Prato Fiorito styles --- */
+    #prato-fiorito h1 {
+      color: #b30000;
+      font-size: 1.6em;
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+      text-shadow: 0 1px 0 #fff, 0 2px 8px rgba(179, 0, 0, 0.7);
+    }
+    #prato-fiorito .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      justify-content: center;
+      margin: 16px auto 0 auto;
+      max-width: 360px;
+    }
+    #prato-fiorito .box {
+      width: 80px;
+      height: 80px;
+      background-color: #fff3f3;
+      border: 2px solid #b30000;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 2.5em;
+      line-height: 80px;
+      transition: 0.2s;
+      color: #b30000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      user-select: none;
+      touch-action: manipulation;
+      box-shadow: 0 1px 6px rgba(179, 0, 0, 0.5);
+    }
+    #prato-fiorito .box:hover, #prato-fiorito .box:focus {
+      background-color: #ffe6e6;
+      outline: 2px solid #ff9999;
+    }
+    #prato-fiorito #pratoMessage {
+      margin-top: 18px;
+      font-size: 1.1em;
+      color: #5a2e8a;
+      min-height: 30px;
+      background: #f3f0fa;
+      border-radius: 8px;
+      padding: 10px 0;
+      box-shadow: 0 1px 6px rgba(179, 0, 0, 0.5);
+    }
+    #prato-fiorito #pratoGameOverVideoContainer {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #prato-fiorito #pratoGameOverVideo {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(179, 0, 0, 0.7);
+      background: #000;
+    }
     @media (max-width: 600px) {
       .tab-content {
         padding: 10px 2vw 20px 2vw;
       }
-      #find-heart .grid {
+      #find-heart .grid, #prato-fiorito .grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 7px;
         max-width: 98vw;
       }
-      #find-heart .box {
+      #find-heart .box, #prato-fiorito .box {
         width: 16vw;
         height: 16vw;
         min-width: 48px;
@@ -206,6 +272,7 @@
   <div class="tab-buttons" role="tablist">
     <button class="tab-btn active" onclick="showTab('romantic-message')" role="tab" aria-selected="true" aria-label="Romantic Message">💌 Romantic Message</button>
     <button class="tab-btn" onclick="showTab('find-heart')" role="tab" aria-selected="false" aria-label="Find the Heart">💜 Find the Heart</button>
+    <button class="tab-btn" onclick="showTab('prato-fiorito')" role="tab" aria-selected="false" aria-label="FNAF">🎮 FNAF</button>
   </div>
 
   <!-- Romantic Message Generator -->
@@ -231,6 +298,27 @@
     </div>
   </div>
 
+  <!-- Prato Fiorito Game -->
+  <div class="tab-content" id="prato-fiorito">
+    <h1 style="color:#b30000;">
+      🧸 Freddy Fazballs 🧸 
+    </h1>
+    <div style="font-size:2em; margin-bottom: 10px;">
+      🧸🦊🐰🐔
+    </div>
+    <div class="grid" id="pratoGameGrid"></div>
+    <div id="pratoMessage" style="margin-top:18px; font-size:1.1em; color:#5a2e8a; min-height:30px; background:#e8f0fe; border-radius:8px; padding:10px 0; box-shadow:0 1px 6px #b8d8f855;">
+      🧁 I was actually coming here to pick up a cupcake... 🧁
+    </div>
+
+    <audio id="pratoWrongSound" preload="auto" src="wrong.mp3"></audio>
+    <audio id="pratoWinSound" preload="auto" src="win.mp3"></audio>
+
+    <div id="pratoGameOverVideoContainer" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.9);display:none;justify-content:center;align-items:center;z-index:9999;">
+      <video id="pratoGameOverVideo" preload="auto" style="max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 0 30px #000;background:black;"></video>
+    </div>
+  </div>
+
   <script>
     // Tab switching logic con accessibilità
     function showTab(tabId) {
@@ -244,10 +332,14 @@
       if(tabId === 'romantic-message') {
         tabs[0].classList.add('active');
         tabs[0].setAttribute('aria-selected', 'true');
-      } else {
+      } else if(tabId === 'find-heart') {
         tabs[1].classList.add('active');
         tabs[1].setAttribute('aria-selected', 'true');
-        initGame(); // Inizializza SEMPRE il gioco quando si apre la tab
+        initGame();
+      } else if(tabId === 'prato-fiorito') {
+        tabs[2].classList.add('active');
+        tabs[2].setAttribute('aria-selected', 'true');
+        initPratoGame();
       }
       document.getElementById(tabId).classList.add('active');
     }
@@ -415,11 +507,149 @@
       initGame();
     });
 
+    // --- Prato Fiorito Game ---
+    const pratoTotalBoxes = 16;
+    const pratoTotalBombs = 4;
+    let pratoHeartIndex;
+    let pratoBombIndexes = [];
+
+    const pratoGrid = document.getElementById("pratoGameGrid");
+    const pratoMessage = document.getElementById("pratoMessage");
+    const pratoWrongSound = document.getElementById("pratoWrongSound");
+    const pratoWinSound = document.getElementById("pratoWinSound");
+    const pratoGameOverVideoContainer = document.getElementById("pratoGameOverVideoContainer");
+    const pratoGameOverVideo = document.getElementById("pratoGameOverVideo");
+
+    function pratoGetRandomIndexes(exclude, count) {
+      const indexes = [];
+      while (indexes.length < count) {
+        const rnd = Math.floor(Math.random() * pratoTotalBoxes);
+        if (!exclude.includes(rnd) && !indexes.includes(rnd)) {
+          indexes.push(rnd);
+        }
+      }
+      return indexes;
+    }
+
+    function initPratoGame() {
+      pratoGameOverVideoContainer.style.display = "none";
+      pratoGameOverVideo.pause();
+      pratoGameOverVideo.currentTime = 0;
+
+      pratoGrid.innerHTML = "";
+
+      pratoHeartIndex = Math.floor(Math.random() * pratoTotalBoxes);
+      pratoBombIndexes = pratoGetRandomIndexes([pratoHeartIndex], pratoTotalBombs);
+
+      const revealed = Array(pratoTotalBoxes).fill(false);
+
+      for (let i = 0; i < pratoTotalBoxes; i++) {
+        const box = document.createElement("div");
+        box.classList.add("box");
+        box.dataset.index = i;
+
+        box.addEventListener("click", () => {
+          if (box.classList.contains("clicked")) return;
+
+          if (parseInt(box.dataset.index) === pratoHeartIndex) {
+            box.textContent = "🧁";
+            box.style.backgroundColor = "#ffe6fa";
+            pratoPlayWinSound();
+            pratoDisableAllBoxes();
+            setTimeout(() => {
+              pratoShowWinnerVideo();
+            }, 1000); // 1 secondo dopo la vittoria
+          } else if (pratoBombIndexes.includes(parseInt(box.dataset.index))) {
+            const bombNumber = pratoBombIndexes.indexOf(parseInt(box.dataset.index)) + 1;
+            box.textContent = "💣" + bombNumber;
+            box.style.backgroundColor = "#22223b";
+            pratoDisableAllBoxes();
+            pratoShowGameOverVideo(bombNumber);
+          } else {
+            pratoRevealSafe(i);
+          }
+        });
+
+        pratoGrid.appendChild(box);
+      }
+
+      function pratoRevealSafe(idx) {
+        const box = pratoGrid.children[idx];
+        if (!box || box.classList.contains("clicked") || revealed[idx]) return;
+        if (pratoBombIndexes.includes(idx) || idx === pratoHeartIndex) return;
+
+        box.classList.add("clicked");
+        box.style.pointerEvents = "none";
+        box.style.backgroundColor = "#c7bfff";
+        box.textContent = "";
+
+        revealed[idx] = true;
+
+        const row = Math.floor(idx / 4);
+        const col = idx % 4;
+
+        const directions = [
+          [-1, 0], // sopra
+          [1, 0],  // sotto
+          [0, -1], // sinistra
+          [0, 1]   // destra
+        ];
+
+        for (const [dr, dc] of directions) {
+          const r = row + dr, c = col + dc;
+          if (r >= 0 && r < 4 && c >= 0 && c < 4) {
+            const nIdx = r * 4 + c;
+            if (!pratoBombIndexes.includes(nIdx) && nIdx !== pratoHeartIndex) {
+              const adjBox = pratoGrid.children[nIdx];
+              if (!adjBox.classList.contains("clicked") && !revealed[nIdx]) {
+                adjBox.classList.add("clicked");
+                adjBox.style.pointerEvents = "none";
+                adjBox.style.backgroundColor = "#c7bfff";
+                adjBox.textContent = "";
+                revealed[nIdx] = true;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function pratoDisableAllBoxes() {
+      const boxes = pratoGrid.querySelectorAll(".box");
+      boxes.forEach(box => (box.style.pointerEvents = "none"));
+    }
+
+    function pratoPlayWinSound() {
+      if (pratoWinSound.src) {
+        pratoWinSound.currentTime = 0;
+        pratoWinSound.play();
+      }
+    }
+
+    function pratoShowGameOverVideo(bombNumber) {
+      pratoGameOverVideo.src = bombNumber + ".mp4";
+      pratoGameOverVideoContainer.style.display = "flex";
+      pratoGameOverVideo.play();
+    }
+
+    function pratoShowWinnerVideo() {
+      pratoGameOverVideo.src = "winner.mp4";
+      pratoGameOverVideoContainer.style.display = "flex";
+      pratoGameOverVideo.play();
+    }
+
+    pratoGameOverVideo.addEventListener("ended", () => {
+      pratoGameOverVideoContainer.style.display = "none";
+      initPratoGame();
+    });
+
     // Inizializza il gioco se la tab è attiva al caricamento
     window.addEventListener('DOMContentLoaded', () => {
       const tabs = document.querySelectorAll('.tab-btn');
       if (tabs[1].classList.contains('active')) {
         initGame();
+      } else if (tabs[2] && tabs[2].classList.contains('active')) {
+        initPratoGame();
       }
     });
   </script>
