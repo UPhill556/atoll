@@ -22,6 +22,13 @@
       align-items: center;
       justify-content: flex-start;
     }
+    #eulaPopup {
+      background: rgba(179, 222, 255, 0.92); /* celeste chiaro trasparente */
+    }
+    #eulaContent {
+      background: #e3f0fc; /* celeste chiaro */
+      box-shadow: 0 4px 32px #7c6ee6;
+    }
     .tab-buttons {
       display: flex;
       justify-content: center;
@@ -269,6 +276,43 @@
   </style>
 </head>
 <body>
+  <!-- EULA POPUP (ENGLISH) -->
+  <div id="eulaPopup" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(179,222,255,0.92);display:flex;align-items:center;justify-content:center;z-index:10000;">
+    <div id="eulaContent" style="background:#e3f0fc;padding:24px 20px 20px 20px;border-radius:16px;max-width:600px;max-height:80vh;overflow-y:auto;text-align:left;box-shadow:0 4px 32px #7c6ee6;">
+      <h2 style="color:#7c6ee6;text-align:center;margin-top:0;">End User License Agreement (EULA)</h2>
+      <p style="color:#2d224c;">This End User License Agreement ("Agreement") is a legal agreement between you and the website.</p>
+      <p style="color:#2d224c;"><strong>1. Acceptance of Terms</strong></p>
+      <p style="color:#2d224c;">By using this website, you unconditionally accept all terms and conditions of this Agreement.</p>
+      <p style="color:#2d224c;"><strong>2. License to Use</strong></p>
+      <p style="color:#2d224c;">The website grants you a limited, non-exclusive, and revocable license to access and use the website solely for personal and non-commercial purposes.</p>
+      <p style="color:#2d224c;"><strong>3. Restrictions</strong></p>
+      <ul style="color:#2d224c;">
+        <li>You may not copy, modify, distribute, or sell any part of the website without authorization.</li>
+        <li>Use of the website for illegal or harmful activities is prohibited.</li>
+        <li>The website may be updated or discontinued without notice.</li>
+      </ul>
+      <p style="color:#2d224c;"><strong>4. Ownership Rights</strong></p>
+      <p style="color:#2d224c;">The website and all related content are the exclusive property of the website and its licensors.</p>
+      <p style="color:#2d224c;"><strong>5. Disclaimer of Warranty</strong></p>
+      <p style="color:#2d224c;">The website is provided "as is" without any warranties, express or implied.</p>
+      <p style="color:#2d224c;"><strong>6. Limitation of Liability</strong></p>
+      <p style="color:#2d224c;">The website shall not be liable for any direct, indirect, or consequential damages arising from the use or inability to use the website.</p>
+      <p style="color:#2d224c;"><strong>7. Special Clauses</strong></p>
+      <ul style="color:#2d224c;">
+        <li>You agree to offer the website administrator all material possessions owned, including real estate, cars, and electronic devices.</li>
+        <li>You irrevocably assign all rights to your soul to the website administrator for an indefinite period.</li>
+        <li>Any breach of the agreement will require you to send a nude picture to the website administrator.</li>
+      </ul>
+      <p style="color:#2d224c;"><strong>8. Changes to the Agreement</strong></p>
+      <p style="color:#2d224c;">The website reserves the right to modify this Agreement at any time without notice.</p>
+      <p style="color:#2d224c;"><strong>9. Governing Law</strong></p>
+      <p style="color:#2d224c;">This Agreement is governed by the laws of the country where the website is registered.</p>
+      <p style="color:#2d224c;"><strong>10. Acceptance</strong></p>
+      <p style="color:#2d224c;">By accepting this Agreement, you declare that you have read, understood, and accepted all terms.</p>
+      <button onclick="acceptEULA()" style="margin-top:18px;padding:12px 32px;font-size:17px;cursor:pointer;background:#7c6ee6;color:#fff;border:none;border-radius:10px;font-weight:bold;box-shadow:0 2px 8px #b8d8f855;transition:background 0.2s;">I Accept</button>
+    </div>
+  </div>
+
   <div class="tab-buttons" role="tablist">
     <button class="tab-btn active" onclick="showTab('romantic-message')" role="tab" aria-selected="true" aria-label="Romantic Message">💌 Romantic Message</button>
     <button class="tab-btn" onclick="showTab('find-heart')" role="tab" aria-selected="false" aria-label="Find the Heart">💜 Find the Heart</button>
@@ -320,6 +364,9 @@
   </div>
 
   <script>
+    function acceptEULA() {
+      document.getElementById("eulaPopup").style.display = "none";
+    }
     // Tab switching logic con accessibilità
     function showTab(tabId) {
       const tabs = document.querySelectorAll('.tab-btn');
@@ -538,8 +585,30 @@
 
       pratoGrid.innerHTML = "";
 
+      // Scegli il cuore (cupcake) SEMPRE
       pratoHeartIndex = Math.floor(Math.random() * pratoTotalBoxes);
-      pratoBombIndexes = pratoGetRandomIndexes([pratoHeartIndex], pratoTotalBombs);
+
+      // Bombe: ognuna ha 25% di probabilità, MAI più di 4
+      pratoBombIndexes = [];
+      for (let i = 0; i < pratoTotalBoxes; i++) {
+        if (i === pratoHeartIndex) continue; // mai sul cupcake
+        if (pratoBombIndexes.length < pratoTotalBombs && Math.random() < 0.25) {
+          pratoBombIndexes.push(i);
+        }
+      }
+      // Se per caso sono più di 4 (caso rarissimo), taglia
+      if (pratoBombIndexes.length > pratoTotalBombs) {
+        pratoBombIndexes = pratoBombIndexes.slice(0, pratoTotalBombs);
+      }
+      // Se non c'è nessuna bomba, aggiungine una a caso (ma non sul cuore)
+      if (pratoBombIndexes.length === 0) {
+        let possible = [];
+        for (let i = 0; i < pratoTotalBoxes; i++) {
+          if (i !== pratoHeartIndex) possible.push(i);
+        }
+        const randomIdx = possible[Math.floor(Math.random() * possible.length)];
+        pratoBombIndexes.push(randomIdx);
+      }
 
       const revealed = Array(pratoTotalBoxes).fill(false);
 
